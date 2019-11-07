@@ -19,5 +19,5 @@ export interface IErrorReporter {
 }
 
 export interface ILoggerFactory {
-  (name: string): ILogger;
+  (name: string | Function): ILogger;
 }

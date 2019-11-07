@@ -2,8 +2,8 @@
 import {Container} from 'inversify';
 import {IConfig} from 'config';
 
-import Symbols from './symbols';
-import {ILoggerFactory, LogLevel} from "./interfaces";
+import Symbols, {ErrorReporter, LoggerDriver} from './symbols';
+import {IErrorReporter, ILoggerDriver, ILoggerFactory, LogLevel} from "./interfaces";
 import {Logger} from "./logger";
 
 export type ReporterType = null | '' | 'SENTRY' | 'NOOP';
@@ -50,6 +50,9 @@ export function setup(container: Container, config: IConfig) {
   const driver = getDriver(config.get<ILoggerConfig>('logger') || {});
   const reporter = getReporter(config.get<IReporterConfig>('reporter') || {});
 
+  container.bind<ILoggerDriver>(LoggerDriver).toConstantValue(driver);
+  container.bind<IErrorReporter>(ErrorReporter).toConstantValue(reporter);
+
   container.bind<ILoggerFactory>(Symbols.LoggerFactory)
-    .toConstantValue((name: string) => new Logger(name, driver, reporter));
+    .toConstantValue((name: string | Function) => new Logger(typeof name === 'function' ? name.name : name, driver, reporter));
 }

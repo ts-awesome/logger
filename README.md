@@ -2,16 +2,27 @@
 
 Provides logging and error tracking capabilities
 
+```bash
+npm install --save @viatsyshyn/ts-logger
+# or
+yarn add @viatsyshyn/ts-logger
+```
+
 ## Basic usage
 
 config expected to provide `ILoggerConfig` for `logger` key and `IReporterConfig` for `reporter` key.
 
 ```ts
-import setup from '@viatsyshyn/ts-logger';
+import {setup, ILoggerFactory, LoggerFactory, ILogger} from '@viatsyshyn/ts-logger';
 
 // TODO: create container and config
 
 setup(container, config);
+
+const loggerFactory = container.get<ILoggerFactory>(LoggerFactory)
+const logger = loggerFactory('system');
+
+logger.info('app is ready');
 ```
 
 ```ts
@@ -25,7 +36,7 @@ class SampleUser {
     constructor(
         @inject(LoggerFactory) loggerFactory: ILoggerFactory,
     ) {
-        this.logger = loggerFactory(SampleUser.name);
+        this.logger = loggerFactory(SampleUser);
     }
 
     public logRandom() {
@@ -50,7 +61,7 @@ function getDriver({type, logLevel}: ILoggerConfig) {
     case null:
     case '':
     case 'NOOP': return () => {};
-    case 'CONSOLE': return require('./logger/console')(logLevel);
+    // TODO: provide other drivers
     default:
       throw new Error(`Unknown logger type ${type}`);
   }
@@ -62,7 +73,7 @@ function getReporter({type, ...extra}: IReporterConfig) {
     case null:
     case '':
     case 'NOOP': return () => {};
-    case 'SENTRY': return require('./reporters/sentry').default(extra);
+    // TODO: provide other reporters
     default:
       throw new Error(`Unknown reporter type ${type}`);
   }
@@ -71,6 +82,9 @@ function getReporter({type, ...extra}: IReporterConfig) {
 function setup(container: Container, config: IConfig) {
   const driver = getDriver(config.get<ILoggerConfig>('logger') || {});
   const reporter = getReporter(config.get<IReporterConfig>('reporter') || {});
+
+  container.bind<ILoggerDriver>(LoggerDriver).toConstantValue(driver);
+  container.bind<IErrorReporter>(ErrorReporter).toConstantValue(reporter);
 
   container.bind<ILoggerFactory>(Symbols.LoggerFactory)
     .toConstantValue((name: string) => new Logger(name, driver, reporter));
