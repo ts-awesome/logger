@@ -14,7 +14,7 @@ import setup from '@viatsyshyn/ts-logger';
 setup(container, config);
 ```
 
-```
+```ts
 import {LoggerFactory, ILoggerFactory, ILogger} from '@viatsyshyn/ts-logger';
 
 @injectable()
