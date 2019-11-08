@@ -1,8 +1,8 @@
 
-import {Container} from 'inversify';
+import {Container, interfaces} from 'inversify';
 
-import {ErrorReporter, LoggerDriver, LoggerFactory} from './symbols';
-import {IErrorReporter, ILoggerDriver, ILoggerFactory, LogLevel} from "./interfaces";
+import {Config, ErrorReporter, LoggerDriver, LoggerFactory} from './symbols';
+import {IErrorReporter, ILogger, ILoggerDriver, ILoggerFactory, LogLevel, Named} from "./interfaces";
 import {Logger} from "./logger";
 
 export type ReporterType = null | '' | 'SENTRY' | 'NOOP' | string;
@@ -50,13 +50,26 @@ function getReporter({type, ...extra}: IReporterConfig): IErrorReporter {
   }
 }
 
-export function setup(container: Container, config: IConfig) {
-  const driver = getDriver(config.get<ILoggerConfig>('logger') || {});
-  const reporter = getReporter(config.get<IReporterConfig>('reporter') || {});
+export function setup(container: Container) {
 
-  container.bind<ILoggerDriver>(LoggerDriver).toConstantValue(driver);
-  container.bind<IErrorReporter>(ErrorReporter).toConstantValue(reporter);
+  container.bind<ILoggerDriver>(LoggerDriver)
+    .toFactory<ILoggerDriver>(({container}: interfaces.Context) => {
+      const config = container.get<IConfig>(Config);
+      return () => getDriver(config.get<ILoggerConfig>('logger') || {})
+    });
+
+  container.bind<IErrorReporter>(ErrorReporter)
+    .toFactory<IErrorReporter>(({container}: interfaces.Context) => {
+      const config = container.get<IConfig>(Config);
+      return () => getReporter(config.get<IReporterConfig>('reporter') || {})
+    });
 
   container.bind<ILoggerFactory>(LoggerFactory)
-    .toConstantValue((name: string | Function) => new Logger(typeof name === 'function' ? name.name : name, driver, reporter));
+    .toFactory<ILogger>(({container}: interfaces.Context) => {
+      return () => {
+        const driver = container.get<ILoggerDriver>(LoggerDriver);
+        const reporter = container.get<IErrorReporter>(ErrorReporter);
+        return (name: any) => new Logger(typeof name === 'function' ? name.name : name, driver, reporter);
+      };
+    });
 }

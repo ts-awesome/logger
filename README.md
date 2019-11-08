@@ -29,11 +29,11 @@ config expected to provide `ILoggerConfig` for `logger` key and `IReporterConfig
 Reporter `SENTRY` requires `@sentry/node` or `@sentry/browser` depending on environment. Please install separately.
 
 ```ts
-import {setup, ILoggerFactory, LoggerFactory, ILogger} from '@viatsyshyn/ts-logger';
+import {setup, ILoggerFactory, LoggerFactory, ILogger, IConfig} from '@viatsyshyn/ts-logger';
 
-// TODO: create container and config
+// TODO: create container and bind config as Symbols.Config
 
-setup(container, config);
+setup(container);
 
 const loggerFactory = container.get<ILoggerFactory>(LoggerFactory)
 const logger = loggerFactory('system');
@@ -95,14 +95,27 @@ function getReporter({type, ...extra}: IReporterConfig) {
   }
 }
 
-function setup(container: Container, config: IConfig) {
-  const driver = getDriver(config.get<ILoggerConfig>('logger') || {});
-  const reporter = getReporter(config.get<IReporterConfig>('reporter') || {});
+function setup(container: Container) {
 
-  container.bind<ILoggerDriver>(Symbols.LoggerDriver).toConstantValue(driver);
-  container.bind<IErrorReporter>(Symbols.ErrorReporter).toConstantValue(reporter);
+  container.bind<ILoggerDriver>(LoggerDriver)
+    .toFactory<ILoggerDriver>(({container}: interfaces.Context) => {
+      const config = container.get<IConfig>(Config);
+      return () => getDriver(config.get<ILoggerConfig>('logger') || {})
+    });
 
-  container.bind<ILoggerFactory>(Symbols.LoggerFactory)
-    .toConstantValue((name: string) => new Logger(name, driver, reporter));
+  container.bind<IErrorReporter>(ErrorReporter)
+    .toFactory<IErrorReporter>(({container}: interfaces.Context) => {
+      const config = container.get<IConfig>(Config);
+      return () => getReporter(config.get<IReporterConfig>('reporter') || {})
+    });
+
+  container.bind<ILoggerFactory>(LoggerFactory)
+    .toFactory<ILogger>(({container}: interfaces.Context) => {
+      return () => {
+        const driver = container.get<ILoggerDriver>(LoggerDriver);
+        const reporter = container.get<IErrorReporter>(ErrorReporter);
+        return (name: any) => new Logger(typeof name === 'function' ? name.name : name, driver, reporter);
+      };
+    });
 }
 ```

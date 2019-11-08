@@ -18,6 +18,10 @@ export interface IErrorReporter {
   (error: Error, ...extra: any[]): void;
 }
 
+export type Named = {
+  name: string;
+}
+
 export interface ILoggerFactory {
-  (name: string | Function): ILogger;
+  (name: string | Named): ILogger;
 }
