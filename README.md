@@ -26,6 +26,8 @@ config expected to provide `ILoggerConfig` for `logger` key and `IReporterConfig
 }
 ```
 
+Reporter `SENTRY` requires `@sentry/node` or `@sentry/browser` depending on environment. Please install separately.
+
 ```ts
 import {setup, ILoggerFactory, LoggerFactory, ILogger} from '@viatsyshyn/ts-logger';
 
