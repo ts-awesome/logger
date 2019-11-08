@@ -97,8 +97,8 @@ function setup(container: Container, config: IConfig) {
   const driver = getDriver(config.get<ILoggerConfig>('logger') || {});
   const reporter = getReporter(config.get<IReporterConfig>('reporter') || {});
 
-  container.bind<ILoggerDriver>(LoggerDriver).toConstantValue(driver);
-  container.bind<IErrorReporter>(ErrorReporter).toConstantValue(reporter);
+  container.bind<ILoggerDriver>(Symbols.LoggerDriver).toConstantValue(driver);
+  container.bind<IErrorReporter>(Symbols.ErrorReporter).toConstantValue(reporter);
 
   container.bind<ILoggerFactory>(Symbols.LoggerFactory)
     .toConstantValue((name: string) => new Logger(name, driver, reporter));
