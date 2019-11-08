@@ -9,6 +9,7 @@ export type ReporterType = null | '' | 'SENTRY' | 'NOOP' | string;
 export type LoggerType = null | '' | 'CONSOLE' | 'NOOP' | string;
 
 import consoleFactory from './loggers/console';
+import sentryFactory from './reporters/sentry';
 
 interface IConfig {
   get<T>(setting: string): T;
@@ -43,7 +44,7 @@ function getReporter({type, ...extra}: IReporterConfig): IErrorReporter {
     case null:
     case '':
     case 'NOOP': return () => {};
-    case 'SENTRY': return require('./reporters/sentry').default(extra);
+    case 'SENTRY': return sentryFactory(extra);
     default:
       throw new Error(`Unknown reporter type ${type}`);
   }
