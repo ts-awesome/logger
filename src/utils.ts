@@ -6,8 +6,8 @@ import Symbols, {ErrorReporter, LoggerDriver} from './symbols';
 import {IErrorReporter, ILoggerDriver, ILoggerFactory, LogLevel} from "./interfaces";
 import {Logger} from "./logger";
 
-export type ReporterType = null | '' | 'SENTRY' | 'NOOP';
-export type LoggerType = null | '' | 'CONSOLE' | 'NOOP';
+export type ReporterType = null | '' | 'SENTRY' | 'NOOP' | string;
+export type LoggerType = null | '' | 'CONSOLE' | 'NOOP' | string;
 
 import consoleFactory from './loggers/console';
 
