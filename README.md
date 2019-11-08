@@ -54,11 +54,11 @@ class SampleUser {
     }
 
     public logRandom() {
-        this.logger.log('random:', Math.random());
+        this.logger.log('random: %d', Math.random());
     }
 
     public errors() {
-        this.logger.error(new Error('sample'));
+        this.logger.error(new Error('sample'), {user: {id: 2}, tags: {role: 'demo'}});
     }
 }
 ```
