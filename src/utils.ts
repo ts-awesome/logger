@@ -53,23 +53,21 @@ function getReporter({type, ...extra}: IReporterConfig): IErrorReporter {
 export function setup(container: Container) {
 
   container.bind<ILoggerDriver>(LoggerDriverSymbol)
-    .toFactory<ILoggerDriver>(({container}: interfaces.Context) => {
+    .toDynamicValue(({container}: interfaces.Context) => {
       const config = container.get<IConfig>(ConfigSymbol);
-      return () => getDriver(config.get<ILoggerConfig>('logger') || {})
-    });
+      return getDriver(config.get<ILoggerConfig>('logger') || {})
+    }).inSingletonScope();
 
   container.bind<IErrorReporter>(ErrorReporterSymbol)
-    .toFactory<IErrorReporter>(({container}: interfaces.Context) => {
+    .toDynamicValue(({container}: interfaces.Context) => {
       const config = container.get<IConfig>(ConfigSymbol);
-      return () => getReporter(config.get<IReporterConfig>('reporter') || {})
-    });
+      return getReporter(config.get<IReporterConfig>('reporter') || {})
+    }).inSingletonScope();
 
   container.bind<ILoggerFactory>(LoggerFactorySymbol)
-    .toFactory<ILogger>(({container}: interfaces.Context) => {
-      return () => {
-        const driver = container.get<ILoggerDriver>(LoggerDriverSymbol);
-        const reporter = container.get<IErrorReporter>(ErrorReporterSymbol);
-        return (name: any) => new Logger(typeof name === 'function' ? name.name : name, driver, reporter);
-      };
-    });
+    .toDynamicValue(({container}: interfaces.Context) => {
+      const driver = container.get<ILoggerDriver>(LoggerDriverSymbol);
+      const reporter = container.get<IErrorReporter>(ErrorReporterSymbol);
+      return (name: any) => new Logger(typeof name === 'function' ? name.name : name, driver, reporter);
+    }).inSingletonScope();
 }
