@@ -11,14 +11,11 @@
   "devDependencies": {
     "@sentry/browser": "^5.7.1",
     "@sentry/node": "^5.7.1",
-    "@types/config": "0.0.36",
     "@types/node": "^12.12.6",
-    "config": "^3.0.0",
     "inversify": "^5.0.0",
     "typescript": "^3.7.2"
   },
   "peerDependencies": {
-    "config": "^3.0.0",
     "inversify": "^5.0.0"
   },
   "author": "Volodymyr Iatsyshyn <viatsyshyn@gmail.com>",

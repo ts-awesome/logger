@@ -1,6 +1,5 @@
 
 import {Container} from 'inversify';
-import {IConfig} from 'config';
 
 import {ErrorReporter, LoggerDriver, LoggerFactory} from './symbols';
 import {IErrorReporter, ILoggerDriver, ILoggerFactory, LogLevel} from "./interfaces";
@@ -10,6 +9,10 @@ export type ReporterType = null | '' | 'SENTRY' | 'NOOP' | string;
 export type LoggerType = null | '' | 'CONSOLE' | 'NOOP' | string;
 
 import consoleFactory from './loggers/console';
+
+interface IConfig {
+  get<T>(setting: string): T;
+}
 
 export interface IReporterConfig {
   type: ReporterType;
