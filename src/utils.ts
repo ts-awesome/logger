@@ -1,7 +1,7 @@
 
 import {Container, interfaces} from 'inversify';
 
-import {Config, ErrorReporter, LoggerDriver, LoggerFactory} from './symbols';
+import {ConfigSymbol, ErrorReporterSymbol, LoggerDriverSymbol, LoggerFactorySymbol} from './symbols';
 import {IErrorReporter, ILogger, ILoggerDriver, ILoggerFactory, LogLevel, Named} from "./interfaces";
 import {Logger} from "./logger";
 
@@ -52,23 +52,23 @@ function getReporter({type, ...extra}: IReporterConfig): IErrorReporter {
 
 export function setup(container: Container) {
 
-  container.bind<ILoggerDriver>(LoggerDriver)
+  container.bind<ILoggerDriver>(LoggerDriverSymbol)
     .toFactory<ILoggerDriver>(({container}: interfaces.Context) => {
-      const config = container.get<IConfig>(Config);
+      const config = container.get<IConfig>(ConfigSymbol);
       return () => getDriver(config.get<ILoggerConfig>('logger') || {})
     });
 
-  container.bind<IErrorReporter>(ErrorReporter)
+  container.bind<IErrorReporter>(ErrorReporterSymbol)
     .toFactory<IErrorReporter>(({container}: interfaces.Context) => {
-      const config = container.get<IConfig>(Config);
+      const config = container.get<IConfig>(ConfigSymbol);
       return () => getReporter(config.get<IReporterConfig>('reporter') || {})
     });
 
-  container.bind<ILoggerFactory>(LoggerFactory)
+  container.bind<ILoggerFactory>(LoggerFactorySymbol)
     .toFactory<ILogger>(({container}: interfaces.Context) => {
       return () => {
-        const driver = container.get<ILoggerDriver>(LoggerDriver);
-        const reporter = container.get<IErrorReporter>(ErrorReporter);
+        const driver = container.get<ILoggerDriver>(LoggerDriverSymbol);
+        const reporter = container.get<IErrorReporter>(ErrorReporterSymbol);
         return (name: any) => new Logger(typeof name === 'function' ? name.name : name, driver, reporter);
       };
     });

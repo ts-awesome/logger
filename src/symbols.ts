@@ -1,10 +1,11 @@
-export const Config = Symbol.for('IConfig');
-export const LoggerFactory = Symbol.for('LoggerFactory');
-export const LoggerDriver = Symbol.for('LoggerDriver');
-export const ErrorReporter = Symbol.for('ErrorReporter');
+export const ConfigSymbol = Symbol.for('IConfig');
+export const LoggerFactorySymbol = Symbol.for('LoggerFactory');
+export const LoggerDriverSymbol = Symbol.for('LoggerDriver');
+export const ErrorReporterSymbol = Symbol.for('ErrorReporter');
 
 export default {
-  LoggerFactory,
-  LoggerDriver,
-  ErrorReporter,
+  Config: ConfigSymbol,
+  LoggerFactory: LoggerFactorySymbol,
+  LoggerDriver: LoggerDriverSymbol,
+  ErrorReporter: ErrorReporterSymbol,
 }
