@@ -12,6 +12,20 @@ yarn add @viatsyshyn/ts-logger
 
 config expected to provide `ILoggerConfig` for `logger` key and `IReporterConfig` for `reporter` key.
 
+```json
+{
+    "logger": {
+        "type": "CONSOLE",
+        "logLevel": "warn"
+    },
+    "reporter": {
+        "type": "SENTRY",
+        "dsn": "__DSN__",
+        "server-name": "extraA",
+    }
+}
+```
+
 ```ts
 import {setup, ILoggerFactory, LoggerFactory, ILogger} from '@viatsyshyn/ts-logger';
 

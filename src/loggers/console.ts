@@ -9,6 +9,9 @@ const mapping = {
 
 export default function (logLevel: LogLevel): ILoggerDriver {
   const current = mapping[logLevel] || 0;
+
+  console.info(`logger is active with level ${logLevel}(${current})`);
+
   return (level: LogLevel, ...data: string[]) => {
     // tslint:disable:no-console
     ((mapping[level] || 0) >= current) && console[level](...data);

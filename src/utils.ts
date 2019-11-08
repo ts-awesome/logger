@@ -22,7 +22,7 @@ export interface ILoggerConfig {
   logLevel: LogLevel;
 }
 
-function getDriver({type, logLevel}: ILoggerConfig) {
+function getDriver({type, logLevel}: ILoggerConfig): ILoggerDriver {
   switch (type) {
     case undefined:
     case null:
@@ -34,7 +34,7 @@ function getDriver({type, logLevel}: ILoggerConfig) {
   }
 }
 
-function getReporter({type, ...extra}: IReporterConfig) {
+function getReporter({type, ...extra}: IReporterConfig): IErrorReporter {
   switch (type) {
     case undefined:
     case null:

@@ -1,11 +1,11 @@
 export interface ILogger {
-  log(...message: any[]): void;
-  info(...message: any[]): void;
-  warn(...message: any[]): void;
+  log(message: string, ...extra: any[]): void;
+  info(message: string, ...extra: any[]): void;
+  warn(message: string, ...extra: any[]): void;
   error(error: Error | string, ...extra: any[]): void;
 
-  trace(...message: any[]): void;
-  debug(...message: any[]): void;
+  trace(message: string, ...extra: any[]): void;
+  debug(message: string, ...extra: any[]): void;
 }
 
 export type LogLevel = keyof ILogger;
