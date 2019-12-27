@@ -9,7 +9,7 @@ const mapping = {
 
 type Writer = (dest: string, line: string) => void;
 
-export function FileLogger(
+export default function (
   logLevel: LogLevel,
   path: string = '%date%.log',
   writer: Writer = require('fs').appendFileSync

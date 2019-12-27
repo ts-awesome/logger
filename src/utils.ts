@@ -6,9 +6,10 @@ import {IErrorReporter, ILogger, ILoggerDriver, ILoggerFactory, LogLevel, Named}
 import {Logger} from "./logger";
 
 export type ReporterType = null | '' | 'SENTRY' | 'NOOP' | string;
-export type LoggerType = null | '' | 'CONSOLE' | 'NOOP' | string;
+export type LoggerType = null | '' | 'CONSOLE' | 'FILE' | 'NOOP' | string;
 
 import consoleFactory from './loggers/console';
+import fileFactory from './loggers/file';
 import sentryFactory from './reporters/sentry';
 
 interface IConfig {
@@ -24,21 +25,23 @@ export interface IReporterConfig {
 export interface ILoggerConfig {
   type: LoggerType;
   logLevel: LogLevel;
+  path?: string;
 }
 
-function getDriver({type, logLevel}: ILoggerConfig): ILoggerDriver {
+export function getDriver({type, logLevel, path}: ILoggerConfig): ILoggerDriver {
   switch (type) {
     case undefined:
     case null:
     case '':
     case 'NOOP': return () => {};
     case 'CONSOLE': return consoleFactory(logLevel);
+    case 'FILE': return fileFactory(logLevel, path);
     default:
       throw new Error(`Unknown logger type ${type}`);
   }
 }
 
-function getReporter({type, ...extra}: IReporterConfig): IErrorReporter {
+export function getReporter({type, ...extra}: IReporterConfig): IErrorReporter {
   switch (type) {
     case undefined:
     case null:
