@@ -23,5 +23,6 @@ export type Named = {
 }
 
 export interface ILoggerFactory {
-  (name: string | Named): ILogger;
+  (name: string): ILogger;
+  (ctor: Named): ILogger;
 }

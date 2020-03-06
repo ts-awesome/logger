@@ -1,5 +1,7 @@
 import { IErrorReporter } from '../interfaces';
 
+declare var window: any;
+
 export default function ({dsn, ...extra}: any): IErrorReporter {
   if (dsn === undefined) {
     throw new Error(`Sentry reporter requires 'dsn' property`);
@@ -10,7 +12,7 @@ export default function ({dsn, ...extra}: any): IErrorReporter {
   Sentry.init({dsn});
 
   return (error: Error, data: any[]) => {
-    const {user, tags, ...extras} = Object.assign({}, extra, ...data.map((x, i) => {
+    const {user, tags, ...extras} = Object.assign({}, extra, ...data?.map((x, i) => {
       return Object.getPrototypeOf(x) === Object ? x : {[i]: x};
     }));
     Sentry.configureScope((scope: any) => {
