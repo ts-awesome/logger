@@ -11,9 +11,9 @@ export default function ({dsn, ...extra}: any): IErrorReporter {
 
   Sentry.init({dsn});
 
-  return (error: Error, data: any[]) => {
-    const {user, tags, ...extras} = Object.assign({}, extra, ...data?.map((x, i) => {
-      return Object.getPrototypeOf(x) === Object ? x : {[i]: x};
+  return ((error: Error, ...data: any[]) => {
+    const {user, tags, ...extras} = Object.assign({}, extra, ...data.map((x, i) => {
+      return Object.getPrototypeOf(x).constructor === Object ? {...x} : {['_' + i]: x};
     }));
     Sentry.configureScope((scope: any) => {
       scope.clear();
@@ -23,5 +23,5 @@ export default function ({dsn, ...extra}: any): IErrorReporter {
     });
 
     Sentry.captureException(error);
-  }
+  }) as IErrorReporter;
 }
