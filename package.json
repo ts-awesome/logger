@@ -1,5 +1,5 @@
 {
-  "name": "@viatsyshyn/ts-logger",
+  "name": "@ts-awesome/logger",
   "version": "0.0.0",
   "description": "TypeScript Logger",
   "main": "dist/index.js",
@@ -13,12 +13,12 @@
     "@sentry/node": "^5.7.1",
     "@types/node": "^12.12.6",
     "inversify": "^5.0.0",
-    "typescript": "^3.7.2"
+    "typescript": "^3.9.5"
   },
   "peerDependencies": {
     "inversify": "^5.0.0"
   },
   "author": "Volodymyr Iatsyshyn <viatsyshyn@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {}
 }
