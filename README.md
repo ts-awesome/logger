@@ -3,9 +3,9 @@
 Provides logging and error tracking capabilities
 
 ```bash
-npm install --save @viatsyshyn/ts-logger
+npm install --save @ts-awesome/logger
 # or
-yarn add @viatsyshyn/ts-logger
+yarn add @ts-awesome/logger
 ```
 
 ## Basic usage
@@ -29,7 +29,7 @@ config expected to provide `ILoggerConfig` for `logger` key and `IReporterConfig
 Reporter `SENTRY` requires `@sentry/node` or `@sentry/browser` depending on environment. Please install separately.
 
 ```ts
-import {setup, ILoggerFactory, LoggerFactory, ILogger, IConfig} from '@viatsyshyn/ts-logger';
+import {setup, ILoggerFactory, LoggerFactory, ILogger, IConfig} from '@ts-awesome/logger';
 
 // TODO: create container and bind config as Symbols.Config
 
@@ -42,7 +42,7 @@ logger.info('app is ready');
 ```
 
 ```ts
-import {LoggerFactory, ILoggerFactory, ILogger} from '@viatsyshyn/ts-logger';
+import {LoggerFactory, ILoggerFactory, ILogger} from '@ts-awesome/logger';
 
 @injectable()
 class SampleUser {
