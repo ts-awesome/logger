@@ -13,25 +13,11 @@ export class Logger implements ILogger {
   ) {
   }
 
-  public readonly log = (message: string, ...extra: unknown[]): void => {
-    this.driver('log', this.name, message, ...extra);
-  }
-
-  public readonly info = (message: string, ...extra: unknown[]): void => {
-    this.driver('info', this.name, message, ...extra);
-  }
-
-  public readonly warn = (message: string, ...extra: unknown[]): void => {
-    this.driver('warn', this.name, message, ...extra);
-  }
-
-  public readonly trace = (message: string, ...extra: unknown[]): void => {
-    this.driver('trace', this.name, message, ...extra);
-  }
-
-  public readonly debug = (message: string, ...extra: unknown[]): void => {
-    this.driver('debug', this.name, message, ...extra);
-  }
+  public readonly trace = (message: string, ...extra: unknown[]): void => this.driver('trace', this.name, message, ...extra);
+  public readonly debug = (message: string, ...extra: unknown[]): void => this.driver('debug', this.name, message, ...extra);
+  public readonly log   = (message: string, ...extra: unknown[]): void => this.driver('log',   this.name, message, ...extra);
+  public readonly info  = (message: string, ...extra: unknown[]): void => this.driver('info',  this.name, message, ...extra);
+  public readonly warn  = (message: string, ...extra: unknown[]): void => this.driver('warn',  this.name, message, ...extra);
 
   public readonly error = (error: Error | string, ...extra: unknown[]): void => {
     if (error instanceof Error) {
