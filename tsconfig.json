@@ -80,5 +80,5 @@
       }
     ]
   },
-  "exclude": ["./bin", "./dist", "./node_modules/**", "./test", "./index.js", "./gulpfile.js", "ecosystem.config.js"]
+  "exclude": ["./bin", "./dist", "./node_modules/**", "./test", "./*.js", "./sentry-ponyfill"]
 }

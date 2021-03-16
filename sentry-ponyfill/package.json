@@ -1,0 +1,8 @@
+{
+  "name": "sentry-ponyfill",
+  "version": "0.0.0",
+  "main": "./node.entry.js",
+  "browser": "./browser.entry.js",
+  "react-native": "./rn.entry.js",
+  "electron": "./electron.entry.js"
+}

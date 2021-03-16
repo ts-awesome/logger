@@ -6,19 +6,24 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
+    "lint": "eslint \"src/**/*.ts\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
-    "@sentry/browser": "^5.7.1",
     "@sentry/node": "^5.7.1",
     "@types/node": "^12.12.6",
+    "@typescript-eslint/eslint-plugin": "^2.16.0",
+    "@typescript-eslint/parser": "^2.16.0",
+    "eslint": "^6.8.0",
     "inversify": "^5.0.0",
-    "typescript": "^3.9.5"
+    "typescript": "^4.2.3"
   },
   "peerDependencies": {
     "inversify": "^5.0.0"
   },
   "author": "Volodymyr Iatsyshyn <viatsyshyn@gmail.com>",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "sentry-ponyfill": "file:sentry-ponyfill"
+  }
 }

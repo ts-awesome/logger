@@ -2,7 +2,7 @@
 import {Container, interfaces} from 'inversify';
 
 import {ConfigSymbol, ErrorReporterSymbol, LoggerDriverSymbol, LoggerFactorySymbol} from './symbols';
-import {IErrorReporter, ILogger, ILoggerDriver, ILoggerFactory, LogLevel, Named} from "./interfaces";
+import {IErrorReporter, ILogger, ILoggerDriver, ILoggerFactory, LogLevel} from "./interfaces";
 import {Logger} from "./logger";
 
 export type ReporterType = null | '' | 'SENTRY' | 'NOOP' | string;
@@ -19,7 +19,7 @@ interface IConfig {
 export interface IReporterConfig {
   type: ReporterType;
   uid: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ILoggerConfig {
@@ -29,11 +29,11 @@ export interface ILoggerConfig {
 }
 
 export function getDriver({type, logLevel, path}: ILoggerConfig): ILoggerDriver {
-  switch (type) {
+  switch (type?.toUpperCase()) {
     case undefined:
     case null:
     case '':
-    case 'NOOP': return () => {};
+    case 'NOOP': return (): void => void 0;
     case 'CONSOLE': return consoleFactory(logLevel);
     case 'FILE': return fileFactory(logLevel, path);
     default:
@@ -42,18 +42,18 @@ export function getDriver({type, logLevel, path}: ILoggerConfig): ILoggerDriver 
 }
 
 export function getReporter({type, ...extra}: IReporterConfig): IErrorReporter {
-  switch (type) {
+  switch (type?.toUpperCase()) {
     case undefined:
     case null:
     case '':
-    case 'NOOP': return () => {};
+    case 'NOOP': return (): void => void 0;
     case 'SENTRY': return sentryFactory(extra);
     default:
       throw new Error(`Unknown reporter type ${type}`);
   }
 }
 
-export function setup(container: Container) {
+export function setup(container: Container): void {
 
   container.bind<ILoggerDriver>(LoggerDriverSymbol)
     .toDynamicValue(({container}: interfaces.Context) => {
@@ -71,6 +71,6 @@ export function setup(container: Container) {
     .toDynamicValue(({container}: interfaces.Context) => {
       const driver = container.get<ILoggerDriver>(LoggerDriverSymbol);
       const reporter = container.get<IErrorReporter>(ErrorReporterSymbol);
-      return (name: any) => new Logger(typeof name === 'function' ? name.name : name, driver, reporter);
+      return (name): ILogger => new Logger(typeof name === 'function' ? name.name : name, driver, reporter);
     }).inSingletonScope();
 }

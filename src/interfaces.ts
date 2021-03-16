@@ -1,21 +1,21 @@
 export interface ILogger {
-  log(message: string, ...extra: any[]): void;
-  info(message: string, ...extra: any[]): void;
-  warn(message: string, ...extra: any[]): void;
-  error(error: Error | string, ...extra: any[]): void;
+  log(message: string, ...extra: unknown[]): void;
+  info(message: string, ...extra: unknown[]): void;
+  warn(message: string, ...extra: unknown[]): void;
+  error(error: Error | string, ...extra: unknown[]): void;
 
-  trace(message: string, ...extra: any[]): void;
-  debug(message: string, ...extra: any[]): void;
+  trace(message: string, ...extra: unknown[]): void;
+  debug(message: string, ...extra: unknown[]): void;
 }
 
 export type LogLevel = keyof ILogger;
 
 export interface ILoggerDriver {
-  (level: LogLevel, ...data: string[]): void;
+  (level: LogLevel, prefix: string, message: string, ...data: unknown[]): void;
 }
 
 export interface IErrorReporter {
-  (error: Error, ...extra: any[]): void;
+  (error: Error, ...extra: unknown[]): void;
 }
 
 export type Named = {

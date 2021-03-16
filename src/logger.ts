@@ -1,45 +1,46 @@
 import {IErrorReporter, ILogger, ILoggerDriver} from "./interfaces";
 
-export class Logger implements ILogger {
+function getCtor(x): string {
+  return (typeof x === 'object' && x && Object.getPrototypeOf(x).constructor?.name) + ':' ?? '';
+}
 
-  private readonly prefix: string[];
+export class Logger implements ILogger {
 
   constructor(
     private readonly name: string,
     private readonly driver: ILoggerDriver,
-    private readonly reporter: IErrorReporter,
+    private readonly reporter?: IErrorReporter,
   ) {
-    this.prefix = [`${this.name}:`];
   }
 
-  public log(...message: any[]): void {
-    this.driver('log', ...this.prefix, ...message);
+  public log(message: string, ...extra: unknown[]): void {
+    this.driver('log', this.name, message, ...extra);
   }
 
-  public info(...message: any[]): void {
-    this.driver('info', ...this.prefix, ...message);
+  public info(message: string, ...extra: unknown[]): void {
+    this.driver('info', this.name, message, ...extra);
   }
 
-  public warn(...message: any[]): void {
-    this.driver('warn', ...this.prefix, ...message);
+  public warn(message: string, ...extra: unknown[]): void {
+    this.driver('warn', this.name, message, ...extra);
   }
 
-  public trace(...message: any[]): void {
-    this.driver('trace', ...this.prefix, ...message);
+  public trace(message: string, ...extra: unknown[]): void {
+    this.driver('trace', this.name, message, ...extra);
   }
 
-  public debug(...message: any[]): void {
-    this.driver('debug', ...this.prefix, ...message);
+  public debug(message: string, ...extra: unknown[]): void {
+    this.driver('debug', this.name, message, ...extra);
   }
 
-  public error(error: Error | string, ...extra: any[]): void {
+  public error(error: Error | string, ...extra: unknown[]): void {
     if (error instanceof Error) {
       const {message, stack} = error;
-      this.driver('error', ...this.prefix, message, JSON.stringify({stack}, null, 2));
+      this.driver('error', this.name, stack?.replace(/^Error:/, getCtor(error)) ?? message);
     } else {
-      this.driver('error', ...this.prefix, error);
+      this.driver('error', this.name, error);
       error = new Error(error);
     }
-    this.reporter(error, ...extra);
+    this.reporter?.(error, ...extra);
   }
 }
