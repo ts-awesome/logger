@@ -7,19 +7,18 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint \"src/**/*.ts\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "npm i ./sentry-ponyfill"
   },
   "devDependencies": {
     "@sentry/node": "^5.7.1",
     "@types/node": "^12.12.6",
     "@typescript-eslint/eslint-plugin": "^2.16.0",
     "@typescript-eslint/parser": "^2.16.0",
+    "sentry-ponyfill": "file:sentry-ponyfill",
     "eslint": "^6.8.0",
     "typescript": "^4.2.3"
   },
   "author": "Volodymyr Iatsyshyn <viatsyshyn@gmail.com>",
   "license": "MIT",
-  "dependencies": {
-    "sentry-ponyfill": "file:sentry-ponyfill"
-  }
 }
