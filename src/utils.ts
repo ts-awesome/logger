@@ -1,6 +1,3 @@
-
-import {Container, interfaces} from 'inversify';
-
 import {ConfigSymbol, ErrorReporterSymbol, LoggerDriverSymbol, LoggerFactorySymbol} from './symbols';
 import {IErrorReporter, ILogger, ILoggerDriver, ILoggerFactory, LogLevel} from "./interfaces";
 import {Logger} from "./logger";
@@ -53,22 +50,31 @@ export function getReporter({type, ...extra}: IReporterConfig): IErrorReporter {
   }
 }
 
-export function setup(container: Container): void {
+interface IContainer {
+  get<T>(name: symbol): T;
+  bind<T>(name: symbol): {
+    toDynamicValue(provider: (context: {container: IContainer}) => T): {
+      inSingletonScope();
+    };
+  };
+}
+
+export function setup(container: IContainer): void {
 
   container.bind<ILoggerDriver>(LoggerDriverSymbol)
-    .toDynamicValue(({container}: interfaces.Context) => {
+    .toDynamicValue(({container}) => {
       const config = container.get<IConfig>(ConfigSymbol);
       return getDriver(config.get<ILoggerConfig>('logger') || {})
     }).inSingletonScope();
 
   container.bind<IErrorReporter>(ErrorReporterSymbol)
-    .toDynamicValue(({container}: interfaces.Context) => {
+    .toDynamicValue(({container}) => {
       const config = container.get<IConfig>(ConfigSymbol);
       return getReporter(config.get<IReporterConfig>('reporter') || {})
     }).inSingletonScope();
 
   container.bind<ILoggerFactory>(LoggerFactorySymbol)
-    .toDynamicValue(({container}: interfaces.Context) => {
+    .toDynamicValue(({container}) => {
       const driver = container.get<ILoggerDriver>(LoggerDriverSymbol);
       const reporter = container.get<IErrorReporter>(ErrorReporterSymbol);
       return (name): ILogger => new Logger(typeof name === 'function' ? name.name : name, driver, reporter);
