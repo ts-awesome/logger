@@ -13,27 +13,27 @@ export class Logger implements ILogger {
   ) {
   }
 
-  public log(message: string, ...extra: unknown[]): void {
+  public readonly log = (message: string, ...extra: unknown[]): void => {
     this.driver('log', this.name, message, ...extra);
   }
 
-  public info(message: string, ...extra: unknown[]): void {
+  public readonly info = (message: string, ...extra: unknown[]): void => {
     this.driver('info', this.name, message, ...extra);
   }
 
-  public warn(message: string, ...extra: unknown[]): void {
+  public readonly warn = (message: string, ...extra: unknown[]): void => {
     this.driver('warn', this.name, message, ...extra);
   }
 
-  public trace(message: string, ...extra: unknown[]): void {
+  public readonly trace = (message: string, ...extra: unknown[]): void => {
     this.driver('trace', this.name, message, ...extra);
   }
 
-  public debug(message: string, ...extra: unknown[]): void {
+  public readonly debug = (message: string, ...extra: unknown[]): void => {
     this.driver('debug', this.name, message, ...extra);
   }
 
-  public error(error: Error | string, ...extra: unknown[]): void {
+  public readonly error = (error: Error | string, ...extra: unknown[]): void => {
     if (error instanceof Error) {
       const {message, stack} = error;
       this.driver('error', this.name, stack?.replace(/^Error:/, getCtor(error)) ?? message);
