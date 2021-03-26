@@ -8,6 +8,7 @@ export type LoggerType = null | '' | 'CONSOLE' | 'FILE' | 'NOOP' | string;
 import consoleFactory from './loggers/console';
 import fileFactory from './loggers/file';
 import sentryFactory from './reporters/sentry';
+import slackFactory from './reporters/slack';
 
 interface IConfig {
   get<T>(setting: string): T;
@@ -23,15 +24,16 @@ export interface ILoggerConfig {
   type: LoggerType;
   logLevel: LogLevel;
   path?: string;
+  colorize?: boolean;
 }
 
-export function getDriver({type, logLevel, path}: ILoggerConfig): ILoggerDriver {
+export function getDriver({type, logLevel = 'debug', path, colorize}: ILoggerConfig): ILoggerDriver {
   switch (type?.toUpperCase()) {
     case undefined:
     case null:
     case '':
     case 'NOOP': return (): void => void 0;
-    case 'CONSOLE': return consoleFactory(logLevel);
+    case 'CONSOLE': return consoleFactory(logLevel, colorize ?? true);
     case 'FILE': return fileFactory(logLevel, path);
     default:
       throw new Error(`Unknown logger type ${type}`);
@@ -39,12 +41,25 @@ export function getDriver({type, logLevel, path}: ILoggerConfig): ILoggerDriver 
 }
 
 export function getReporter({type, ...extra}: IReporterConfig): IErrorReporter {
-  switch (type?.toUpperCase()) {
+  const types = type?.toUpperCase().split(',').map(x => x?.trim()).filter(x => x) ?? [];
+  if (types.length > 1) {
+    const reporters = types.map(type => getReporter({type, ...extra}));
+    return function (error: Error, ...extra: unknown[]): void {
+      try {
+        reporters.forEach(h => h(error, ...extra));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
+
+  switch (types[0]) {
     case undefined:
     case null:
     case '':
     case 'NOOP': return (): void => void 0;
-    case 'SENTRY': return sentryFactory(extra);
+    case 'SENTRY': return sentryFactory(extra as any);
+    case 'SLACK': return slackFactory(extra as any);
     default:
       throw new Error(`Unknown reporter type ${type}`);
   }

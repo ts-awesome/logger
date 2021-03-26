@@ -4,8 +4,7 @@ function isObject(x: unknown): x is Record<string, unknown> {
   return typeof x === 'object' && x != null && Object.getPrototypeOf(x).constructor === Object;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function ({dsn, ...extra}: any): IErrorReporter {
+export default function ({dsn, ...extra}: { dsn: string; [key: string]: unknown }): IErrorReporter {
   if (dsn === undefined) {
     throw new Error(`Sentry reporter requires 'dsn' property`);
   }
