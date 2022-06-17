@@ -44,7 +44,7 @@ Please note that `console` can be used a replacement for Logger.
 ```ts
 import {Config} from '@ts-awesome/config';
 import {Container} from "inversify";
-import {getLoggerFactory} from "./utils";
+import {getLoggerFactory, LoggerFactorySymbol} from "@ts-awesome/logger";
 
 const container: Container;
 const config: Config;
@@ -57,7 +57,7 @@ const loggerFactory = getLoggerFactory(driverCfg, reporterCfg);
 container.bind<ILoggerFactory>(LoggerFactorySymbol).toConstantValue(loggerFactory);
 ```
 
-## Bare console logger
+## Console logger
 
 ```ts
 import driverFactory from '@ts-awesome/logger/dist/loggers/console';
@@ -73,7 +73,7 @@ logger('warn', 'something to pay attantion to');
 logger('error', 'something to be alerted with');
 ```
 
-## Bare file logger
+## File logger
 
 ```ts
 import driverFactory from '@ts-awesome/logger/dist/loggers/file';
@@ -109,7 +109,7 @@ logger('warn', 'something to pay attantion to');
 logger('error', 'something to be alerted with');
 ```
 
-## Bare sentry reporter
+## Sentry reporter
 
 ```ts
 // sentry has to be installed separatly
@@ -133,7 +133,7 @@ const data = {
 reporter(error, data);
 ```
 
-## Bare slack reporter
+## Slack reporter
 
 ```ts
 // cross-fetch has to be installed separatly
