@@ -1,5 +1,5 @@
 import {ConfigSymbol, ErrorReporterSymbol, LoggerDriverSymbol, LoggerFactorySymbol} from './symbols';
-import {IErrorReporter, ILogger, ILoggerDriver, ILoggerFactory, LogLevel} from "./interfaces";
+import {IErrorReporter, ILogger, ILoggerDriver, ILoggerFactory, LogLevel, Named} from "./interfaces";
 import {Logger} from "./logger";
 
 export type ReporterType = null | '' | 'SENTRY' | 'NOOP' | string;
@@ -63,6 +63,16 @@ export function getReporter({type, ...extra}: IReporterConfig): IErrorReporter {
     default:
       throw new Error(`Unknown reporter type ${type}`);
   }
+}
+
+export function getLoggerFactory(driverCfg: ILoggerConfig, reporterCfg?: IReporterConfig): ILoggerFactory {
+  const driver = getDriver(driverCfg);
+  const reporter = reporterCfg ? getReporter(reporterCfg) : undefined;
+  return (nameOrConstructor: string | Named): ILogger => new Logger(
+    typeof nameOrConstructor === 'string' ? nameOrConstructor : nameOrConstructor.name,
+    driver,
+    reporter
+  );
 }
 
 interface IContainer {

@@ -1,118 +1,159 @@
-# ts-logger
+# @ts-awesome/logger
 
-Provides logging and error tracking capabilities
+TypeScript logger and error reporter
 
-```bash
-npm install --save @ts-awesome/logger
-# or
-yarn add @ts-awesome/logger
-```
+Key features:
 
-## Basic usage
+* console and/or file logs
+* colorful console logs
+* sentry/slack error reporters
+* configurable log level
 
-config expected to provide `ILoggerConfig` for `logger` key and `IReporterConfig` for `reporter` key.
+## `Logger`
 
-```json
-{
-    "logger": {
-        "type": "CONSOLE",
-        "logLevel": "warn"
-    },
-    "reporter": {
-        "type": "SENTRY",
-        "dsn": "__DSN__",
-        "server-name": "extraA",
-    }
-}
-```
-
-Reporter `SENTRY` requires `@sentry/node` or `@sentry/browser` depending on environment. Please install separately.
+library provides a convenient `Logger` class to make things easier.
 
 ```ts
-import {setup, ILoggerFactory, LoggerFactory, ILogger, IConfig} from '@ts-awesome/logger';
+import {getLoggerFactory, Logger} from '@ts-awesome/logger';
 
-// TODO: create container and bind config as Symbols.Config
+const driverCfg = {
+  type: 'CONSOLE', // or 'FILE" or 'NOOP'
+}
 
-setup(container);
+const reporterCfg = {
+  type: 'SENTRY', // or 'SLACK' or 'NOOP'
+  dsn: 'dsn-1' // required for sentry
+}
 
-const loggerFactory = container.get<ILoggerFactory>(LoggerFactory)
-const logger = loggerFactory('system');
+const loggerFactory = getLoggerFactory(driverCfg, reporterCfg);
 
-logger.info('app is ready');
+const logger = loggerFactory('app');
+
+logger.trace('something trivial');
+logger.debug('something trivial');
+logger.info('something usefull');
+logger.warn('something to pay attantion to');
+logger.error('something to be alerted with');
+logger.error(new Error('something wrong'));
 ```
 
+Please note that `console` can be used a replacement for Logger.
+
+## Use with IoC container and @ts-awesome/config
+
 ```ts
-import {LoggerFactory, ILoggerFactory, ILogger} from '@ts-awesome/logger';
+import {Config} from '@ts-awesome/config';
+import {Container} from "inversify";
+import {getLoggerFactory} from "./utils";
 
-@injectable()
-class SampleUser {
+const container: Container;
+const config: Config;
 
-    private readonly logger: ILogger;
+const driverCfg = config.get<ILoggerConfig>('logger');
+const reporterCfg = config.has('reporter') ? config.get<ILoggerConfig>('reporter') : undefined;
 
-    constructor(
-        @inject(LoggerFactory) loggerFactory: ILoggerFactory,
-    ) {
-        this.logger = loggerFactory(SampleUser);
-    }
+const loggerFactory = getLoggerFactory(driverCfg, reporterCfg);
 
-    public logRandom() {
-        this.logger.log('random: %d', Math.random());
-    }
-
-    public errors() {
-        this.logger.error(new Error('sample'), {user: {id: 2}, tags: {role: 'demo'}});
-    }
-}
+container.bind<ILoggerFactory>(LoggerFactorySymbol).toConstantValue(loggerFactory);
 ```
 
-## Advanced
-
-You can setup you own customized loggers and reporters using following example
+## Bare console logger
 
 ```ts
+import driverFactory from '@ts-awesome/logger/dist/loggers/console';
 
-function getDriver({type, logLevel}: ILoggerConfig) {
-  switch (type) {
-    case undefined:
-    case null:
-    case '':
-    case 'NOOP': return () => {};
-    // TODO: provide other drivers
-    default:
-      throw new Error(`Unknown logger type ${type}`);
-  }
+const logger = driverFactory(
+  'log', // min log level
+  true, // add colors, true by default
+);
+
+logger('log', 'something trivial');
+logger('info', 'something usefull');
+logger('warn', 'something to pay attantion to');
+logger('error', 'something to be alerted with');
+```
+
+## Bare file logger
+
+```ts
+import driverFactory from '@ts-awesome/logger/dist/loggers/file';
+
+const logger = driverFactory(
+  'info', // min log level
+  'logs-%date%.log', // files pattern, default is `%date%.log`
+  /* alternative Writer, default is `require('fs').appendFileSync` */
+);
+
+logger('log', 'something trivial');
+logger('info', 'something usefull');
+logger('warn', 'something to pay attantion to');
+logger('error', 'something to be alerted with');
+```
+
+## Composite logger
+
+```ts
+import consoleDriverFactory from '@ts-awesome/logger/dist/loggers/console';
+import fileDriverFactory from '@ts-awesome/logger/dist/loggers/console';
+import compositeDriverFactory from '@ts-awesome/logger/dist/loggers/composite';
+
+const logger = compositeDriverFactory(
+  fileDriverFactory('error', 'errors-%date%.log'),
+  fileDriverFactory('info', 'logs-%date%.log'),
+  consoleDriverFactory('log'),
+);
+
+logger('log', 'something trivial');
+logger('info', 'something usefull');
+logger('warn', 'something to pay attantion to');
+logger('error', 'something to be alerted with');
+```
+
+## Bare sentry reporter
+
+```ts
+// sentry has to be installed separatly
+import reporterFactory from '@ts-awesome/logger/dist/reporters/sentry';
+
+const config = {
+  dsn: 'dns-1', // your destination,
+  // rest is added to report
+  some: 'extra'
 }
 
-function getReporter({type, ...extra}: IReporterConfig) {
-  switch (type) {
-    case undefined:
-    case null:
-    case '':
-    case 'NOOP': return () => {};
-    // TODO: provide other reporters
-    default:
-      throw new Error(`Unknown reporter type ${type}`);
-  }
+const reporter = reporterFactory(config);
+
+const error = new Error('Test case');
+const data = {
+  user: 'some-id',
+  tags: ['tag1', 'tag2'],
+  other: 'extra'
 }
 
-function setup(container: Container) {
-  container.bind<ILoggerDriver>(LoggerDriverSymbol)
-    .toDynamicValue(({container}: interfaces.Context) => {
-      const config = container.get<IConfig>(ConfigSymbol);
-      return getDriver(config.get<ILoggerConfig>('logger') || {})
-    }).inSingletonScope();
+reporter(error, data);
+```
 
-  container.bind<IErrorReporter>(ErrorReporterSymbol)
-    .toDynamicValue(({container}: interfaces.Context) => {
-      const config = container.get<IConfig>(ConfigSymbol);
-      return getReporter(config.get<IReporterConfig>('reporter') || {})
-    }).inSingletonScope();
+## Bare slack reporter
 
-  container.bind<ILoggerFactory>(LoggerFactorySymbol)
-    .toDynamicValue(({container}: interfaces.Context) => {
-      const driver = container.get<ILoggerDriver>(LoggerDriverSymbol);
-      const reporter = container.get<IErrorReporter>(ErrorReporterSymbol);
-      return (name: any) => new Logger(typeof name === 'function' ? name.name : name, driver, reporter);
-    }).inSingletonScope();
+```ts
+// cross-fetch has to be installed separatly
+import reporterFactory from '@ts-awesome/logger/dist/reporters/slack';
+
+const config = {
+  webhook: 'https://example.org', // obtaine url from Slack
+  username: 'ErrorReporterBot', 
+  // rest is added to report
+  some: 'extra'
 }
+
+const reporter = reporterFactory(config);
+
+const error = new Error('Test case');
+const data = {
+  user: 'some-id',
+  tags: ['tag1', 'tag2'],
+  other: 'extra'
+}
+
+reporter(error, data);
 ```
