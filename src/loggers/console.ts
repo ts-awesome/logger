@@ -1,36 +1,39 @@
 import {ILoggerDriver, LogLevel} from "../interfaces";
 
+import {mapping} from "./consts";
+
 import {
   bgRedBright,
   bgYellowBright,
   bold,
   fgBlack,
-  fgBlue, fgGreen,
+  fgBlue,
+  fgGreen,
   fgRed,
   fgSilver,
   fgWhite,
   fgYellow,
-  reset
+  reset,
 } from "../cli-color";
 
-const mapping = {
-  log: 1,
-  info: 2,
-  warn: 3,
-  error: 4,
-};
-
 const COLORS = {
+  'trace': fgSilver,
   'debug': fgSilver,
   'info': fgBlue,
   'warn': fgYellow,
   'error': fgRed,
 }
 
-export default function (logLevel: LogLevel, colorize = true): ILoggerDriver {
-  const current = mapping[logLevel.toLowerCase()] || 0;
+export default function (logLevel: LogLevel, colorize?: boolean): ILoggerDriver {
+  colorize = colorize ?? (typeof process === 'undefined' || !process || typeof process.stdout?.clearLine === 'function');
 
-  console.info( `${bold}${fgGreen}logger is active with level ${fgYellow}${logLevel}(${current})${reset}`);
+  const current = mapping[logLevel.toLowerCase()] ?? 0;
+
+  if (colorize) {
+    console.info(`${bold}${fgGreen}logger is active with level ${fgYellow}${logLevel}(${current})${reset}`);
+  } else {
+    console.info(`logger is active with level ${logLevel}(${current})`);
+  }
 
   function str(x: unknown): string {
     return typeof x === 'string' && x ? x : JSON.stringify(x);
@@ -58,7 +61,7 @@ export default function (logLevel: LogLevel, colorize = true): ILoggerDriver {
 
   return (level: LogLevel, prefix: string, message: string, ...data: unknown[]): void => {
 
-    if ((mapping[level] || 0) < current) {
+    if ((mapping[level] ?? 0) < current) {
       return
     }
 

@@ -1,12 +1,5 @@
 import {ILoggerDriver, LogLevel} from "../interfaces";
-
-const mapping = {
-  trace: -1,
-  log: 1,
-  info: 2,
-  warn: 3,
-  error: 4,
-};
+import {mapping} from "./consts";
 
 type Writer = (dest: string, line: string) => void;
 
@@ -15,9 +8,9 @@ export default function (
   path = '%date%.log',
   writer: Writer = require('fs').appendFileSync
 ): ILoggerDriver {
-  const current = mapping[logLevel] || 0;
+  const current = mapping[logLevel.toLowerCase()] ?? 0;
   return function (level, prefix: string, message: string, ...data: unknown[]): void {
-    if ((mapping[level] || 0) < current) {
+    if ((mapping[level.toLowerCase()] ?? 0) < current) {
       return;
     }
 
